@@ -1,0 +1,19 @@
+{
+  "name": "vyre-chrome",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Vyre for Chrome: let Claude Code or Codex work in your own Chrome. No install, no server.",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "vyre-chrome": "vyre-chrome"
+  },
+  "author": "Irfad Imtiaz, Clearfield Labs",
+  "license": "SEE LICENSE IN NOTICE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clearfield-labs/vyre-chrome"
+  }
+}
