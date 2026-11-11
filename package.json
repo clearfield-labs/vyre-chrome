@@ -1,6 +1,6 @@
 {
   "name": "vyre-chrome",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "type": "module",
   "description": "Vyre for Chrome: let Claude Code or Codex work in your own Chrome. No install, no server.",

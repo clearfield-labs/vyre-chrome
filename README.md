@@ -53,7 +53,7 @@ Ask Claude Code or Codex: "check these cases on these sites every weekday at 7 a
 - Commands: `vyre-chrome job add | list | run | last | remove`. Your AI sets it up for you and runs it once while you watch.
 - Tested on Linux with a fake engine. Not yet tried on a real Mac or Windows schedule.
 
-## Known limits (0.4.0)
+## Known limits (0.4.1)
 
 - One Claude Code or Codex session drives the browser at a time.
 - The local link only accepts this extension, and web pages cannot open it, but another program already running under your own account could still talk to it.
