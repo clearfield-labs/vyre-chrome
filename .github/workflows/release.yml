@@ -1,0 +1,77 @@
+# Builds the two downloads on every version tag (v*): the Mac zip carries Node for Apple silicon and Intel,
+# the Windows zip carries node.exe, so nobody installs Node. Node comes from nodejs.org and is checked
+# against its published SHA-256 sums before it is packed.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build (for example v0.4.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NODE_LINE: latest-v22.x
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Download Node and check it
+        run: |
+          set -euo pipefail
+          mkdir -p dl && cd dl
+          curl -fsSL "https://nodejs.org/dist/${NODE_LINE}/SHASUMS256.txt" -o SHASUMS256.txt
+          V=$(grep -o 'node-v22[0-9.]*-darwin-arm64.tar.gz' SHASUMS256.txt | head -1 | sed 's/node-\(v[0-9.]*\)-.*/\1/')
+          echo "NODE_VERSION=$V" >> "$GITHUB_ENV"
+          for f in "node-$V-darwin-arm64.tar.gz" "node-$V-darwin-x64.tar.gz" "node-$V-win-x64.zip"; do
+            curl -fsSL "https://nodejs.org/dist/$V/$f" -o "$f"
+            grep " $f\$" SHASUMS256.txt | sha256sum -c -
+          done
+          tar -xzf "node-$V-darwin-arm64.tar.gz" "node-$V-darwin-arm64/bin/node"
+          tar -xzf "node-$V-darwin-x64.tar.gz" "node-$V-darwin-x64/bin/node"
+          unzip -q "node-$V-win-x64.zip" "node-$V-win-x64/node.exe"
+
+      - name: Pack the Mac and Windows zips
+        run: |
+          set -euo pipefail
+          V="$NODE_VERSION"
+          for os in mac windows; do
+            root="out/$os/Vyre for Chrome"
+            mkdir -p "$root/runtime"
+            git archive --format=tar HEAD | tar -x -C "$root"
+            rm -rf "$root/.github" "$root/docs"
+            if [ "$os" = mac ]; then
+              cp "dl/node-$V-darwin-arm64/bin/node" "$root/runtime/node-darwin-arm64"
+              cp "dl/node-$V-darwin-x64/bin/node" "$root/runtime/node-darwin-x64"
+              chmod 755 "$root/runtime/"node-* "$root/vyre-chrome" "$root/standalone/vyre-chrome"
+            else
+              cp "dl/node-$V-win-x64/node.exe" "$root/runtime/node.exe"
+            fi
+            # Node's own licence travels with the binary it covers.
+            curl -fsSL "https://raw.githubusercontent.com/nodejs/node/$V/LICENSE" -o "$root/runtime/NODE-LICENSE.txt"
+            echo "Node $V from https://nodejs.org (unchanged, checked against its SHA-256 sums)." > "$root/runtime/README.txt"
+            (cd "out/$os" && zip -qr -X "../../vyre-chrome-$os.zip" "Vyre for Chrome")
+          done
+          sha256sum vyre-chrome-mac.zip vyre-chrome-windows.zip | tee SHA256SUMS.txt
+          unzip -Z vyre-chrome-mac.zip "Vyre for Chrome/runtime/node-darwin-arm64" "Vyre for Chrome/vyre-chrome"
+
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --title "Vyre for Chrome ${TAG#v}" --notes "Download the zip for your computer, or go to https://clearfield-labs.github.io/vyre-chrome/ . Node $NODE_VERSION is included."
+          fi
+          gh release upload "$TAG" vyre-chrome-mac.zip vyre-chrome-windows.zip SHA256SUMS.txt --clobber

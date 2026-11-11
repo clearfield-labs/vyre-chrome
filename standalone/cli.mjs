@@ -19,6 +19,7 @@ import * as nativeHost from "../native-host/install.js";
 import { extensionIdFromKey } from "../native-host/install.js";
 import { guide, extensionsPage } from "../index.js";
 import { startGate } from "./ws-gate.js";
+import { setup } from "./setup.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const MARKER = ".vyre-chrome-marker";
@@ -73,6 +74,10 @@ const HELP = `Vyre for Chrome ${version} (vyre-chrome): control your own Chrome 
   vyre-chrome report [--last N] [--out FILE]      one redacted bundle of your last N sessions, with a summary
   vyre-chrome config ghl-host <domain> [--remove]  optional: a GoHighLevel domain to always count (white-label domains are recognised automatically)
   vyre-chrome config learn on|off                 learn each site's structure on this computer (default on; never a value)
+  vyre-chrome job add <name> --task <file.md> --at HH:MM [--days daily|weekdays|mon,tue,...] [--engine claude|codex] [--chrome-profile "Profile 1"]
+                                                  a daily run: your AI reads and reports on a schedule (it never sends)
+  vyre-chrome job list | remove <name> [--purge] | run <name> | last <name>
+  vyre-chrome setup [--only claude,desktop,codex]   add Vyre for Chrome to Claude Code, Claude desktop and Codex (one step)
   vyre-chrome config sites add <domain>...         only these sites may be used (empty list = every site except the never-touch list)
   vyre-chrome config readonly add <domain>...      these sites may be read, never acted on
   vyre-chrome config block add <domain>...         these sites are never touched
@@ -205,6 +210,12 @@ async function main() {
     throw new Error("config: sites|readonly|block list|add|remove|clear [domains] | confirm-sends on|off | learn on|off | ghl-host <domain> [--remove]");
   }
 
+  if (cmd === "job") {
+    const { jobCli } = await import("./jobs.js");
+    process.exitCode = await jobCli(args, out);
+    return;
+  }
+
   if (cmd === "uninstall") {
     const appDirU = path.join(dataDir, "app");
     const hostDirU = process.env.VYRE_CHROME_HOST_DIR || (fs.existsSync(appDirU) ? path.join(appDirU, "native-host") : hostDir);
@@ -274,6 +285,19 @@ async function main() {
     return;
   }
 
+  // One step after unzipping: add Vyre for Chrome to Claude Code, Claude desktop and Codex, then say what is left (the extension).
+  if (cmd === "setup") {
+    const only = (flag(args, "only") || "").split(",").map(x => x.trim()).filter(x => x && x !== "true");
+    const done = setup({ pkg: PKG, only });
+    out(`Vyre for Chrome ${version}, from ${PKG}`);
+    for (const d of done) out(`${d.done ? "ok " : "!! "} ${d.app}: ${d.how}`);
+    if (!done.length) out("!!  Found neither Claude Code nor Codex on this computer. Install one of them, then run this again.");
+    out("");
+    out("Last step, in Chrome: open chrome://extensions, turn on Developer mode (top right), press Load unpacked and choose this folder:");
+    out(`    ${path.join(PKG, "extension")}`);
+    out("Then quit and reopen Claude Code, the Claude desktop app or Codex, and ask it to run chrome_status.");
+    return;
+  }
   if (cmd === "version" || cmd === "--version") { out(version); return; }
   out(HELP);
 }

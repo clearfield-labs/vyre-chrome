@@ -6,27 +6,22 @@ Speak plainly to the person. Do each step yourself where you can, and tell them 
 
 ## 1. Install it
 
-Do these in order. Stop and say what is wrong if a step fails.
+The download carries its own Node, so nothing else needs installing. The person should not have to type anything: you run every command; they only click in Chrome.
 
-1. **Find the folder.** It is the folder that holds this file (it has `vyre-chrome`, `vyre-chrome.cmd`, `extension/` and `standalone/`). Use its absolute path from here on. If it sits in Downloads or a temporary folder, suggest moving it somewhere it can stay (for example Documents) before going on, because Chrome and the MCP server keep pointing at this path.
-2. **Check Node.** Run `node --version`. It must be 22 or newer. If it is missing or older, ask the person to install Node from https://nodejs.org, then continue. (The launcher also looks in nvm, Volta, fnm, asdf and Homebrew, so a Node that the shell cannot see may still be found; check with `"<folder>/vyre-chrome" --version` on Mac, `"<folder>\vyre-chrome.cmd" --version` on Windows.)
-3. **Mac only:** make sure the launcher can run: `chmod +x "<folder>/vyre-chrome"`.
-4. **Add the MCP server, for this person in every project** (user scope, so it also works in Claude Code inside the Claude desktop app):
-   - Mac or Linux: `claude mcp add -s user vyre-chrome -- "<folder>/vyre-chrome" mcp`
-   - Windows: `claude mcp add -s user vyre-chrome -- "<folder>\vyre-chrome.cmd" mcp`
-   If `vyre-chrome` is already added (`claude mcp list`), remove it first with `claude mcp remove -s user vyre-chrome` (and `-s local` / `-s project` if it shows there).
-   Always use the launcher, never plain `node`: the Claude desktop app starts servers without the shell's PATH, and the launcher finds Node itself.
-5. **Tell the person to load the extension** (you cannot click in Chrome before this exists):
-   > Open `chrome://extensions` in Chrome, turn on **Developer mode** (top right), press **Load unpacked** and choose this folder: `<folder>/extension`. If an older "Vyre for Chrome" is there, remove it first.
-6. **Restart.** Ask the person to restart Claude Code (in the desktop app: quit the app fully and open it again), so the new server loads.
-7. **Check.** Call `chrome_status`. `connected: true` means done. If not connected, read its `problem` and `fix` and tell the person. The usual causes: the extension is not loaded, Chrome is closed, or another Claude Code or Codex session already drives this browser (only one at a time).
-8. **Offer the organization setup** (section 3) before the first real task.
+1. **Get the folder.** If the person has not downloaded it yet, download the zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (`vyre-chrome-mac.zip` on a Mac, `vyre-chrome-windows.zip` on Windows) and unzip it into their Documents folder, which makes a folder called `Vyre for Chrome`. If they already have it, use the folder that holds this file (it has `vyre-chrome`, `vyre-chrome.cmd`, `extension/`, `runtime/`). Do not install from Downloads or a temporary folder: Chrome and the apps keep pointing at this path.
+2. **Mac only:** clear the download mark so macOS lets the bundled Node run: `xattr -dr com.apple.quarantine "<folder>"`.
+3. **Run the setup**, one command:
+   - Mac or Linux: `"<folder>/vyre-chrome" setup`
+   - Windows: `"<folder>\vyre-chrome.cmd" setup`
+   It adds Vyre for Chrome to Claude Code (terminal and Claude desktop app), Claude desktop chat and Codex, whichever are on this computer, replacing any older entry. Read its output to the person in plain words. Lines starting `!!` are problems: fix them or explain them.
+4. **The one click in Chrome.** Tell the person, word for word:
+   > In Chrome, open a new tab and go to `chrome://extensions`. Turn on **Developer mode** (top right). Press **Load unpacked** and choose this folder: `<folder>/extension`. If an older "Vyre for Chrome" is listed, remove it first.
+   Wait until they say done.
+5. **Restart.** Ask the person to quit and reopen Claude Code (in the Claude desktop app: quit the whole app, then open it again), so the new server loads.
+6. **Check.** After the restart, call `chrome_status`. `connected: true` means done. If not, read its `problem` and `fix` and tell the person. Usual causes: the extension is not loaded, Chrome is closed, or another Claude Code or Codex window already drives this browser (only one at a time).
+7. **Offer the organization setup** (section 3) before the first real task.
 
-Optional, Claude desktop chat (not Claude Code): add to `claude_desktop_config.json` (Settings > Developer > Edit Config):
-```json
-{ "mcpServers": { "vyre-chrome": { "command": "<folder>/vyre-chrome", "args": ["mcp"] } } }
-```
-On Windows use `"<folder>\\vyre-chrome.cmd"`. Then quit and reopen the app.
+If the setup cannot run at all (a very locked-down computer), the manual way is the same as step 3 by hand: add an MCP server named `vyre-chrome` whose command is the launcher above with the single argument `mcp`.
 
 ## 2. Use it
 
@@ -74,7 +69,7 @@ Show the current settings with `<cli> config sites list`, `<cli> config readonly
 
 ## 4. Remove it
 
-`claude mcp remove -s user vyre-chrome`, then the person removes the extension in `chrome://extensions`. Settings and logs are in `~/.vyre-chrome`; delete that folder only if the person asks.
+Run `"<folder>/vyre-chrome" setup` from a different folder to move it, or remove it with `claude mcp remove -s user vyre-chrome`; the person removes the extension in `chrome://extensions`. Settings and logs are in `~/.vyre-chrome`; delete that folder only if the person asks.
 
 ## 5. What is not built yet
 
@@ -82,3 +77,31 @@ Be honest about these if asked:
 - Only one Claude Code or Codex session can drive the browser at a time.
 - The local link accepts only this extension and no web page, but another program running under the same account could still reach it. Recommend a separate Chrome profile with only the needed sites signed in, and switching the extension off when not in use.
 - Held actions come from a word list. The always-ask list in the policy file is followed by you, not enforced by the program.
+
+## 6. Daily runs
+
+When the person says "check these on these sites every morning and put the results in a file", set up a daily run. It reads and reports. It never sends, submits, pays or deletes: the run cannot call `chrome_send` or `chrome_resume`.
+
+Ask the person:
+1. What to check, in plain words.
+2. On which sites. They must be on the allowed-sites list: `vyre-chrome config sites add <domain>...` (see section 3).
+3. Where the input list is (a CSV or a spreadsheet export). Read it. Never edit it.
+4. What time and which days (`daily`, `weekdays`, or `mon,wed,fri`).
+5. Which Chrome profile, if they use more than one. The profile folder name is on `chrome://version` ("Profile Path", the last part, for example `Profile 1`).
+
+Then:
+1. Write `task.md` in plain words. Give the input file's absolute path and the exact output columns, one row per item. Say what counts as done, not found, could not read and skipped.
+2. Run: `vyre-chrome job add <name> --task <task.md> --at 07:00 --days weekdays [--chrome-profile "Profile 1"]`
+3. Run it once now, while the person watches: `vyre-chrome job run <name>`. Show the report with `vyre-chrome job last <name>`.
+4. Only when the report is right, leave it scheduled. If it is wrong, change `task.md`, run `job add` again with the same name, and repeat.
+
+Other commands: `vyre-chrome job list`, `vyre-chrome job remove <name>` (add `--purge` to delete the results too).
+
+Tell the person:
+- The computer must be on, logged in, and Chrome allowed to run at that time. On a Mac, keep it awake (System Settings > Battery or Energy) or schedule a wake. On Windows the task runs only while the person is logged on.
+- It runs on the account of the person whose Claude Code is signed in on that computer. It uses their Chrome and their sign-ins.
+- If another Claude Code or Codex session is holding the browser, the run waits up to 10 minutes, then fails and says why.
+- Results are in `~/.vyre-chrome/jobs/<name>/latest.md` (older ones in `runs/`, the last 90 are kept). Staff without Claude just open that file, or you point the job at a shared folder by asking the person to copy or sync `latest.md` there.
+- On Linux the command prints a crontab line instead of installing it.
+
+Be honest: this was tested on Linux with a fake engine. It has not yet been tried on a real Mac or Windows schedule. Watch the first scheduled morning.

@@ -14,8 +14,17 @@ cli="$here/standalone/cli.mjs"
 ok() { [ -x "$1" ] && "$1" -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)' >/dev/null 2>&1; }
 
 node=""
+# 0. the Node that ships inside the download (runtime/node-darwin-arm64 or -x64), so nothing has to be installed
+case "$(uname -m)" in arm64|aarch64) arch=arm64 ;; *) arch=x64 ;; esac
+for root in "$here" "$here/.."; do
+  # A browser marks a downloaded zip, and macOS then refuses to start the Node inside it ("node Not Opened").
+  # Clearing that mark on our own runtime folder is what lets it run; it touches nothing else.
+  if [ -d "$root/runtime" ] && [ "$(uname -s)" = "Darwin" ]; then xattr -dr com.apple.quarantine "$root/runtime" 2>/dev/null || true; chmod +x "$root"/runtime/node-* 2>/dev/null || true; fi
+  b="$root/runtime/node-$(uname -s | tr 'A-Z' 'a-z')-$arch"
+  if [ -z "$node" ] && ok "$b"; then node="$b"; fi
+done
 # 1. what is on PATH, 2. the places a version manager or the OS puts it.
-if p="$(command -v node 2>/dev/null)" && ok "$p"; then node="$p"; fi
+if [ -z "$node" ] && p="$(command -v node 2>/dev/null)" && ok "$p"; then node="$p"; fi
 if [ -z "$node" ]; then
   # Newest first inside each manager's folder (version sort), then the fixed places.
   for cand in \

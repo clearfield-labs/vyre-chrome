@@ -8,23 +8,19 @@ Works on Mac and Windows. Works with Claude Code (in the terminal or in the Clau
 
 ## Get it
 
-Download the zip from the latest release (Releases, on the right of this page) or press **Code > Download ZIP**. Unzip it somewhere it can stay, for example your Documents folder.
+**Download page:** https://clearfield-labs.github.io/vyre-chrome/ (a button for Mac and for Windows, and a prompt to paste into Claude Code or Codex).
 
-## Set it up (three steps)
+Or download `vyre-chrome-mac.zip` or `vyre-chrome-windows.zip` from the latest release (Releases, on the right of this page). Node is included, so there is nothing else to install. Do not use **Code > Download ZIP**: that copy has no Node inside.
 
-The easy way: open Claude Code or Codex **in the unzipped folder** and say *"Install Vyre for Chrome."* It reads [CLAUDE.md](CLAUDE.md) or [CODEX.md](CODEX.md) and does the rest with you.
+## Set it up
 
-By hand:
+The easy way: paste this into Claude Code (or the Code tab of the Claude desktop app) or Codex, and do the one click in Chrome it asks for:
 
-1. **Chrome.** Open `chrome://extensions`, turn on **Developer mode** (top right), press **Load unpacked** and choose the `extension` folder inside the unzipped folder.
-2. **Your AI.** Add the server, with the real path of the unzipped folder:
-   - Claude Code (terminal or desktop app), Mac: `claude mcp add -s user vyre-chrome -- "/path/to/vyre-chrome/vyre-chrome" mcp`
-   - Claude Code, Windows: `claude mcp add -s user vyre-chrome -- "C:\path\to\vyre-chrome\vyre-chrome.cmd" mcp`
-   - Codex, Mac: `codex mcp add vyre-chrome -- "/path/to/vyre-chrome/vyre-chrome" mcp`
-   - Codex, Windows: `codex mcp add vyre-chrome -- "C:\path\to\vyre-chrome\vyre-chrome.cmd" mcp`
-3. **Check.** Restart Claude Code or Codex (quit and reopen the Claude desktop app) and ask it to run `chrome_status`. It says connected. The extension's toolbar icon shows the same.
+> Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my Documents folder, which makes a folder called "Vyre for Chrome". Then read CLAUDE.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.
 
-You need Chrome 116 or newer and Node 22 or newer (https://nodejs.org). The `vyre-chrome` launcher finds Node on its own, also where the Claude desktop app cannot see it (nvm, Volta, fnm, asdf, Homebrew).
+(For Codex, say CODEX.md.) Behind the scenes it runs one command, `vyre-chrome setup`, which adds Vyre for Chrome to Claude Code, the Claude desktop app and Codex, whichever you have. The one thing only you can do is load the extension: in Chrome open `chrome://extensions`, turn on **Developer mode**, press **Load unpacked** and choose the `extension` folder inside "Vyre for Chrome". Then restart the app and ask it to run `chrome_status`.
+
+You need Chrome 116 or newer and Claude Code or Codex.
 
 ## Your organization's rules
 
@@ -48,7 +44,16 @@ Chrome shows a "developer mode extensions" warning when it starts, and "started 
 
 Use a separate Chrome profile, signed in only to the sites the AI should use, with a staff-level account rather than an owner. Switch the extension off in `chrome://extensions` when you are not using it.
 
-## Known limits (0.3.0)
+## Daily runs
+
+Ask Claude Code or Codex: "check these cases on these sites every weekday at 7 am and put the results in a file." It saves the task and the computer runs it on schedule, even when you are not working. Staff without Claude just open the results file (`~/.vyre-chrome/jobs/<name>/latest.md`).
+
+- It reads and reports. It never sends, submits, pays or deletes.
+- The computer must be on and logged in, with Chrome allowed to run. It uses the Chrome and the Claude Code or Codex sign-in of the person on that computer.
+- Commands: `vyre-chrome job add | list | run | last | remove`. Your AI sets it up for you and runs it once while you watch.
+- Tested on Linux with a fake engine. Not yet tried on a real Mac or Windows schedule.
+
+## Known limits (0.4.0)
 
 - One Claude Code or Codex session drives the browser at a time.
 - The local link only accepts this extension, and web pages cannot open it, but another program already running under your own account could still talk to it.

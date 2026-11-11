@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vyre for Chrome</title>
+<meta name="description" content="Let Claude Code or Codex work in your own Chrome, with you watching. Download for Mac or Windows. By Clearfield Labs.">
+<meta property="og:title" content="Vyre for Chrome">
+<meta property="og:description" content="Let Claude Code or Codex work in your own Chrome, with you watching. By Clearfield Labs.">
+<style>
+  :root {
+    --bg: #fbfbfa; --fg: #1d1d1f; --dim: #6b6b70; --line: #e4e4e1; --card: #ffffff;
+    --accent: #0b6e4f; --accent-fg: #ffffff; --soft: #eef5f1; --code: #f3f3f1;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111312; --fg: #f2f2f0; --dim: #a3a5a2; --line: #2a2d2b; --card: #181b19; --accent: #3fbf8f; --accent-fg: #06150f; --soft: #16241e; --code: #1d201e; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+  main { max-width: 760px; margin: 0 auto; padding: 64px 20px 80px; }
+  h1 { font-size: 44px; line-height: 1.08; letter-spacing: -0.025em; margin: 0 0 14px; font-weight: 700; text-wrap: balance; }
+  h2 { font-size: 26px; letter-spacing: -0.015em; margin: 72px 0 8px; font-weight: 650; text-wrap: balance; }
+  p { margin: 0 0 12px; }
+  .lead { font-size: 20px; color: var(--dim); max-width: 34em; }
+  .eyebrow { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 650; margin-bottom: 14px; }
+  .dl { display: flex; gap: 12px; margin: 30px 0 10px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 26px; border-radius: 12px; font-size: 17px; font-weight: 600; text-decoration: none; border: 1.5px solid var(--accent); color: var(--accent); background: transparent; cursor: pointer; font-family: inherit; }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); }
+  .btn:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .small { font-size: 14px; color: var(--dim); }
+  .small a { color: var(--dim); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; margin-top: 18px; }
+  .tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; padding: 3px; background: var(--code); margin: 14px 0 4px; }
+  .tabs button { border: 0; background: transparent; color: var(--dim); font: inherit; font-size: 15px; font-weight: 600; padding: 8px 18px; border-radius: 8px; cursor: pointer; min-height: 40px; }
+  .tabs button[aria-selected="true"] { background: var(--card); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: var(--code); border-radius: 12px; padding: 16px; font: 15px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  .copyrow { display: flex; justify-content: flex-end; margin-top: 12px; }
+  ol.steps { padding-left: 0; list-style: none; counter-reset: s; margin: 16px 0 0; }
+  ol.steps > li { counter-increment: s; position: relative; padding-left: 46px; margin: 0 0 18px; }
+  ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; border-radius: 50%; background: var(--soft); color: var(--accent); font-weight: 700; display: grid; place-items: center; font-size: 15px; }
+  code { font: 0.92em ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: var(--code); padding: 2px 6px; border-radius: 6px; }
+  .inline-copy { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .mini { border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 8px; font: inherit; font-size: 14px; font-weight: 600; padding: 6px 12px; cursor: pointer; min-height: 36px; }
+  details { border-top: 1px solid var(--line); padding: 14px 0; }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; min-height: 32px; align-items: center; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--dim); font-weight: 400; font-size: 22px; }
+  details[open] summary::after { content: "\2212"; }
+  details > div { padding-top: 10px; color: var(--fg); }
+  ul.safe { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 12px; }
+  ul.safe li { padding-left: 30px; position: relative; }
+  ul.safe li::before { content: ""; position: absolute; left: 4px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .prompts { display: grid; gap: 12px; margin-top: 16px; }
+  .prompt { display: flex; gap: 12px; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .prompt span { min-width: 0; }
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--dim); font-size: 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  footer a { color: var(--dim); }
+  @media (max-width: 520px) {
+    main { padding-top: 40px; }
+    h1 { font-size: 34px; }
+    .dl .btn { flex: 1 1 100%; }
+    .prompt { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Clearfield Labs</div>
+  <h1>Vyre for Chrome</h1>
+  <p class="lead">Let Claude Code or Codex work in your own Chrome, with you watching. It reads pages, fills forms and clicks for you. Anything that sends, posts, pays or deletes waits for your yes.</p>
+
+  <div class="dl">
+    <a class="btn" id="dl-mac" href="https://github.com/clearfield-labs/vyre-chrome/releases/latest/download/vyre-chrome-mac.zip">Download for Mac</a>
+    <a class="btn" id="dl-win" href="https://github.com/clearfield-labs/vyre-chrome/releases/latest/download/vyre-chrome-windows.zip">Download for Windows</a>
+  </div>
+  <p class="small">Nothing else to install. <a href="https://github.com/clearfield-labs/vyre-chrome/releases/latest">Version and notes</a></p>
+
+  <h2>The easy way: let your AI install it</h2>
+  <p>Open Claude Code (or the Code tab in the Claude desktop app), or Codex. Paste this, press Enter, and do the one click in Chrome it asks for.</p>
+  <div class="card">
+    <div class="tabs" role="tablist" aria-label="Which app">
+      <button role="tab" id="t-claude" aria-selected="true" aria-controls="p-claude">Claude Code</button>
+      <button role="tab" id="t-codex" aria-selected="false" aria-controls="p-codex">Codex</button>
+    </div>
+    <div id="p-claude" role="tabpanel" aria-labelledby="t-claude">
+      <pre id="pr-claude">Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my Documents folder, which makes a folder called "Vyre for Chrome". Then read CLAUDE.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.</pre>
+      <div class="copyrow"><button class="btn primary" data-copy="pr-claude">Copy prompt</button></div>
+    </div>
+    <div id="p-codex" role="tabpanel" aria-labelledby="t-codex" hidden>
+      <pre id="pr-codex">Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my Documents folder, which makes a folder called "Vyre for Chrome". Then read CODEX.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.</pre>
+      <div class="copyrow"><button class="btn primary" data-copy="pr-codex">Copy prompt</button></div>
+    </div>
+  </div>
+
+  <details>
+    <summary>Or do it by hand</summary>
+    <div>
+      <ol class="steps">
+        <li>Press the download button above and unzip the file into your <strong>Documents</strong> folder. You get a folder called <strong>Vyre for Chrome</strong>.</li>
+        <li>In Chrome, open a new tab and go to <span class="inline-copy"><code id="ext-url">chrome://extensions</code> <button class="mini" data-copy="ext-url">Copy</button></span>. Turn on <strong>Developer mode</strong> (top right). Press <strong>Load unpacked</strong> and choose the <strong>extension</strong> folder inside Vyre for Chrome.</li>
+        <li>Ask Claude Code or Codex: <em>"Run the setup in my Vyre for Chrome folder in Documents."</em> Then quit and reopen the app, and ask it to run <code>chrome_status</code>. It says connected.</li>
+      </ol>
+    </div>
+  </details>
+
+  <h2>Set it up for your firm</h2>
+  <p>Your firm decides which websites it may use. Just ask, in plain words:</p>
+  <div class="prompts">
+    <div class="prompt"><span id="q1">Set up Vyre for Chrome for our firm. It may only use our GoHighLevel and our website.</span><button class="mini" data-copy="q1">Copy</button></div>
+    <div class="prompt"><span id="q2">Show me which websites Vyre for Chrome may use.</span><button class="mini" data-copy="q2">Copy</button></div>
+    <div class="prompt"><span id="q3">Always ask me before you press Disable, Revoke, Transfer or Make admin.</span><button class="mini" data-copy="q3">Copy</button></div>
+  </div>
+
+  <h2>Safe by design</h2>
+  <ul class="safe">
+    <li>Sends, posts, payments and deletes wait for your yes.</li>
+    <li>Passwords, cookies and tokens are hidden from the AI.</li>
+    <li>Banks, password managers and sign-in pages are never touched.</li>
+    <li>Only the websites your firm allows. Everything else is refused.</li>
+    <li>Press Esc in the page, or Cmd+Shift+E (Ctrl+Shift+E on Windows), to stop it at once.</li>
+  </ul>
+  <p class="small" style="margin-top:16px">Tip: use a separate Chrome profile, signed in only to the sites it should use.</p>
+
+  <h2>If something is off</h2>
+  <details><summary>It says "not connected"</summary><div>Make sure Chrome is open and the extension is loaded in <code>chrome://extensions</code>. Quit and reopen Claude Code or Codex after the setup. Only one Claude Code or Codex window can drive the browser at a time, so close the others.</div></details>
+  <details><summary>Chrome warns about developer mode extensions</summary><div>That is normal. It appears because you loaded the extension yourself instead of from the Chrome Web Store.</div></details>
+  <details><summary>Chrome says it "started debugging this browser"</summary><div>That is normal while Vyre for Chrome works in a tab. It goes away when it stops.</div></details>
+  <details><summary>Chrome says "Manifest file is missing"</summary><div>You picked the wrong folder. Choose the <strong>extension</strong> folder inside Vyre for Chrome, not Vyre for Chrome itself.</div></details>
+  <details><summary>A Mac says "node" cannot be opened</summary><div>Ask Claude Code or Codex to run the setup in your Vyre for Chrome folder. It clears the download mark macOS puts on new files, then it opens normally.</div></details>
+
+  <footer><span>Clearfield Labs · Made by Irfad Imtiaz</span><a href="https://github.com/clearfield-labs/vyre-chrome">Source on GitHub</a></footer>
+</main>
+<script>
+  (function () {
+    var ua = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || "";
+    var isWin = /win/i.test(ua);
+    document.getElementById(isWin ? "dl-win" : "dl-mac").classList.add("primary");
+    var tabs = [["t-claude", "p-claude"], ["t-codex", "p-codex"]];
+    tabs.forEach(function (t) {
+      document.getElementById(t[0]).addEventListener("click", function () {
+        tabs.forEach(function (o) {
+          var on = o[0] === t[0];
+          document.getElementById(o[0]).setAttribute("aria-selected", String(on));
+          document.getElementById(o[1]).hidden = !on;
+        });
+      });
+    });
+    document.querySelectorAll("[data-copy]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var el = document.getElementById(b.getAttribute("data-copy"));
+        var text = el.textContent;
+        var label = b.textContent;
+        var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = label; }, 2000); };
+        var select = function () { var r = document.createRange(); r.selectNodeContents(el); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Press Cmd+C or Ctrl+C"; setTimeout(function () { b.textContent = label; }, 3000); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, select); else select();
+      });
+    });
+  })();
+</script>
+</body>
+</html>
