@@ -108,12 +108,12 @@ export function findEngine(bin, env = process.env) {
   throw new Error(`could not find ${exe} on this computer. Install it and sign in, then run this again.`);
 }
 
-/** The launcher that the scheduler calls: the installed copy if there is one, else the folder this runs from. @param {string} dataDir */
-export function launcherPath(dataDir = dataDirOf()) {
+/** The launcher that the scheduler calls: the one in the folder this runs from (the same one Claude Code and Codex start), never an older installed copy. @param {string} [_dataDir] */
+export function launcherPath(_dataDir = dataDirOf()) {
   const win = process.platform === "win32";
   const f = win ? "vyre-chrome.cmd" : "vyre-chrome";
-  const cands = [path.join(dataDir, "app", f), path.join(PKG, f), path.join(PKG, "standalone", f)];
-  return cands.find(c => fs.existsSync(c)) || cands[1];
+  const cands = [path.join(PKG, f), path.join(PKG, "standalone", f)];
+  return cands.find(c => fs.existsSync(c)) || cands[0];
 }
 
 const jobsDir = (/** @type {string} */ dataDir) => path.join(dataDir, "jobs");
