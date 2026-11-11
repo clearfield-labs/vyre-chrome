@@ -195,12 +195,24 @@ export function start(chrome, opts = {}) {
     timer = setT(() => { timer = null; connect(); }, wait);
   }
 
+  let probing = false;
   function connect() {
     if (port) return;
     // A wake-up by the alarm must not shorten the wait the backoff already chose.
     if (now() - lastAttempt < MIN_RETRY_MS) { scheduleReconnect(); return; }
     lastAttempt = now();
     conn.attempts++; conn.lastAttemptAt = now();
+    // Ask quietly first: a WebSocket to a closed port is logged by Chrome as an extension error (a red "Errors" button that
+    // looks broken), while a failed probe is not. Connect only once Claude Code or Codex is listening.
+    if (!probing) {
+      probing = true;
+      fetch("http://127.0.0.1:47213/", { mode: "no-cors", cache: "no-store" }).then(() => { probing = false; lastAttempt = 0; reallyConnect(); }, () => { probing = false; failed("waiting for Claude Code or Codex to start Vyre for Chrome"); scheduleReconnect(); });
+    }
+    return;
+  }
+
+  function reallyConnect() {
+    if (port) return;
     let p;
     try { p = localPort(); } catch (e) { failed(/** @type {any} */ (e) && /** @type {any} */ (e).message || String(e)); scheduleReconnect(); return; }
     port = p;

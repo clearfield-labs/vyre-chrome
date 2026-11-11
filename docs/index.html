@@ -85,11 +85,11 @@
       <button role="tab" id="t-codex" aria-selected="false" aria-controls="p-codex">Codex</button>
     </div>
     <div id="p-claude" role="tabpanel" aria-labelledby="t-claude">
-      <pre id="pr-claude">Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my Documents folder, which makes a folder called "Vyre for Chrome". Then read CLAUDE.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.</pre>
+      <pre id="pr-claude">Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my home folder (not Documents, Desktop or Downloads, which macOS protects), which makes a folder called "Vyre for Chrome". Then read CLAUDE.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.</pre>
       <div class="copyrow"><button class="btn primary" data-copy="pr-claude">Copy prompt</button></div>
     </div>
     <div id="p-codex" role="tabpanel" aria-labelledby="t-codex" hidden>
-      <pre id="pr-codex">Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my Documents folder, which makes a folder called "Vyre for Chrome". Then read CODEX.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.</pre>
+      <pre id="pr-codex">Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my home folder (not Documents, Desktop or Downloads, which macOS protects), which makes a folder called "Vyre for Chrome". Then read CODEX.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.</pre>
       <div class="copyrow"><button class="btn primary" data-copy="pr-codex">Copy prompt</button></div>
     </div>
   </div>
@@ -98,9 +98,9 @@
     <summary>Or do it by hand</summary>
     <div>
       <ol class="steps">
-        <li>Press the download button above and unzip the file into your <strong>Documents</strong> folder. You get a folder called <strong>Vyre for Chrome</strong>.</li>
+        <li>Press the download button above and unzip the file into your <strong>home</strong> folder (the one with your name). You get a folder called <strong>Vyre for Chrome</strong>.</li>
         <li>In Chrome, open a new tab and go to <span class="inline-copy"><code id="ext-url">chrome://extensions</code> <button class="mini" data-copy="ext-url">Copy</button></span>. Turn on <strong>Developer mode</strong> (top right). Press <strong>Load unpacked</strong> and choose the <strong>extension</strong> folder inside Vyre for Chrome.</li>
-        <li>Ask Claude Code or Codex: <em>"Run the setup in my Vyre for Chrome folder in Documents."</em> Then quit and reopen the app, and ask it to run <code>chrome_status</code>. It says connected.</li>
+        <li>Ask Claude Code or Codex: <em>"Run the setup in my Vyre for Chrome folder."</em> Then quit and reopen the app, and ask it to run <code>chrome_status</code>. It says connected.</li>
       </ol>
     </div>
   </details>

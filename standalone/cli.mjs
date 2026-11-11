@@ -289,12 +289,12 @@ async function main() {
   if (cmd === "setup") {
     const only = (flag(args, "only") || "").split(",").map(x => x.trim()).filter(x => x && x !== "true");
     const done = setup({ pkg: PKG, only });
-    out(`Vyre for Chrome ${version}, from ${PKG}`);
+    out(`Vyre for Chrome ${version}, from ${/** @type {any} */ (done).pkg || PKG}`);
     for (const d of done) out(`${d.done ? "ok " : "!! "} ${d.app}: ${d.how}`);
     if (!done.length) out("!!  Found neither Claude Code nor Codex on this computer. Install one of them, then run this again.");
     out("");
     out("Last step, in Chrome: open chrome://extensions, turn on Developer mode (top right), press Load unpacked and choose this folder:");
-    out(`    ${path.join(PKG, "extension")}`);
+    out(`    ${path.join(/** @type {any} */ (done).pkg || PKG, "extension")}`);
     out("Then quit and reopen Claude Code, the Claude desktop app or Codex, and ask it to run chrome_status.");
     return;
   }

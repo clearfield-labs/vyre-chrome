@@ -72,6 +72,20 @@ export function codexToml(existing, launcher) {
  * @returns {{ app: string, done: boolean, how: string }[]}
  */
 export function setup({ pkg, home = os.homedir(), platform = process.platform, only = [] }) {
+  // macOS protects Documents, Desktop, Downloads and iCloud Drive: the Claude desktop app may not start a program from
+  // there ("Operation not permitted"). So a copy in one of them moves to ~/Vyre for Chrome first, and that copy is used.
+  /** @type {string|null} */ let moved = null;
+  if (platform === "darwin") {
+    const guarded = ["Documents", "Desktop", "Downloads", "Library/Mobile Documents"].map(d => path.join(home, d) + path.sep);
+    if (guarded.some(g => (pkg + path.sep).startsWith(g))) {
+      const dest = path.join(home, "Vyre for Chrome");
+      if (path.resolve(dest) !== path.resolve(pkg)) {
+        if (fs.existsSync(dest)) fs.renameSync(dest, `${dest} (old ${new Date().toISOString().slice(0, 10)}-${process.pid})`);
+        fs.cpSync(pkg, dest, { recursive: true });
+        moved = dest; pkg = dest;
+      }
+    }
+  }
   const launcher = launcherOf(pkg, platform);
   const want = (/** @type {string} */ a) => !only.length || only.includes(a);
   /** @type {{ app: string, done: boolean, how: string }[]} */ const out = [];
@@ -117,5 +131,6 @@ export function setup({ pkg, home = os.homedir(), platform = process.platform, o
       catch (e) { out.push({ app: "Codex", done: false, how: /** @type {Error} */ (e).message }); }
     }
   }
-  return out;
+  if (moved) out.unshift({ app: "Moved to your home folder", done: true, how: `macOS does not let apps start programs from Documents, Desktop or Downloads, so Vyre for Chrome now lives in ${moved}. Load the extension from there. The old copy can be deleted.` });
+  return Object.assign(out, { pkg });
 }

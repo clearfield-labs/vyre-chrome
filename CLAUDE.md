@@ -8,7 +8,7 @@ Speak plainly to the person. Do each step yourself where you can, and tell them 
 
 The download carries its own Node, so nothing else needs installing. The person should not have to type anything: you run every command; they only click in Chrome.
 
-1. **Get the folder.** If the person has not downloaded it yet, download the zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (`vyre-chrome-mac.zip` on a Mac, `vyre-chrome-windows.zip` on Windows) and unzip it into their Documents folder, which makes a folder called `Vyre for Chrome`. If they already have it, use the folder that holds this file (it has `vyre-chrome`, `vyre-chrome.cmd`, `extension/`, `runtime/`). Do not install from Downloads or a temporary folder: Chrome and the apps keep pointing at this path.
+1. **Get the folder.** If the person has not downloaded it yet, download the zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (`vyre-chrome-mac.zip` on a Mac, `vyre-chrome-windows.zip` on Windows) and unzip it into their home folder (on a Mac not Documents, Desktop or Downloads: macOS stops apps starting programs there), which makes a folder called `Vyre for Chrome`. If they already have it, use the folder that holds this file (it has `vyre-chrome`, `vyre-chrome.cmd`, `extension/`, `runtime/`). Do not install into Documents, Desktop, Downloads or a temporary folder. The setup moves a Mac copy out of those by itself and says where it went; use that path from then on.
 2. **Mac only:** clear the download mark so macOS lets the bundled Node run: `xattr -dr com.apple.quarantine "<folder>"`.
 3. **Run the setup**, one command:
    - Mac or Linux: `"<folder>/vyre-chrome" setup`

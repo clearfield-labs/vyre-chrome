@@ -16,7 +16,7 @@ Or download `vyre-chrome-mac.zip` or `vyre-chrome-windows.zip` from the latest r
 
 The easy way: paste this into Claude Code (or the Code tab of the Claude desktop app) or Codex, and do the one click in Chrome it asks for:
 
-> Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my Documents folder, which makes a folder called "Vyre for Chrome". Then read CLAUDE.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.
+> Install Vyre for Chrome for me. Download the right zip for this computer from https://github.com/clearfield-labs/vyre-chrome/releases/latest (vyre-chrome-mac.zip on a Mac, vyre-chrome-windows.zip on Windows) and unzip it into my home folder (not Documents, Desktop or Downloads, which macOS protects), which makes a folder called "Vyre for Chrome". Then read CLAUDE.md in that folder and follow its install steps. Do every step yourself and only ask me for the clicks in Chrome. When it is done, check it with chrome_status.
 
 (For Codex, say CODEX.md.) Behind the scenes it runs one command, `vyre-chrome setup`, which adds Vyre for Chrome to Claude Code, the Claude desktop app and Codex, whichever you have. The one thing only you can do is load the extension: in Chrome open `chrome://extensions`, turn on **Developer mode**, press **Load unpacked** and choose the `extension` folder inside "Vyre for Chrome". Then restart the app and ask it to run `chrome_status`.
 
@@ -53,7 +53,7 @@ Ask Claude Code or Codex: "check these cases on these sites every weekday at 7 a
 - Commands: `vyre-chrome job add | list | run | last | remove`. Your AI sets it up for you and runs it once while you watch.
 - Tested on Linux with a fake engine. Not yet tried on a real Mac or Windows schedule.
 
-## Known limits (0.4.1)
+## Known limits (0.4.2)
 
 - One Claude Code or Codex session drives the browser at a time.
 - The local link only accepts this extension, and web pages cannot open it, but another program already running under your own account could still talk to it.
